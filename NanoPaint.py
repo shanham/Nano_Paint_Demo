@@ -1,4 +1,6 @@
-""" Science Festival Demonstration showing how nanoscale structure leads to colouration
+""" NanoPaint.py 
+
+Science festival demonstration showing how nanoscale structure leads to colouration
 
 Author: Dr Stephen Hanham
 
@@ -74,7 +76,6 @@ class NanoPaint(QMainWindow, Ui_MainWindow):
         self.plot.setAxisMaxMinor(self.plot.get_axis_id('left'), 5)
         axis_id = self.plot.get_axis_id('left')
         self.plot.set_axis_limits(axis_id, 0, 1)
-
         self.refl_graph.show()
 
     def update_refl_graph(self):
@@ -105,7 +106,7 @@ class NanoPaint(QMainWindow, Ui_MainWindow):
 
     def calc_current_colour(self):
         ''' Returns a colour value by integrating reflectance curve over corresponding wavelength regions '''
-        ri = np.logical_and(self.lam >= 620,self.lam <= 750)
+        ri = np.logical_and(self.lam >= 620, self.lam <= 750)
         gi = np.logical_and(self.lam >= 495, self.lam <= 570)
         bi = np.logical_and(self.lam >= 450, self.lam <= 495)
 
@@ -121,4 +122,3 @@ if __name__ == '__main__':
     mainWin = NanoPaint(app_ref=app)
     ret = app.exec_()
     sys.exit(ret)
-
