@@ -66,16 +66,23 @@ class NanoPaint(QMainWindow, Ui_MainWindow):
         self.plot = self.refl_graph.get_plot()
         self.plot.add_item(self.plot_curve)
         self.plot.set_titles(xlabel='Wavelength (nm)', ylabel='Reflectance')
+        label_font = QFont("Arial", 10)
+        label_font.setBold(True)
+        self.plot.set_axis_font("left", label_font)
+        self.plot.set_axis_font("bottom", label_font)
+        self.plot.setAxisMaxMajor(self.plot.get_axis_id('left'), 5)
+        self.plot.setAxisMaxMinor(self.plot.get_axis_id('left'), 5)
+        axis_id = self.plot.get_axis_id('left')
+        self.plot.set_axis_limits(axis_id, 0, 1)
+
         self.refl_graph.show()
 
     def update_refl_graph(self):
         ''' Update reflection graph with current slider values '''
         self.curr_refl = self.calc_refl(self.diameter_slider.value(), self.period_slider.value(), self.lam)
         self.plot_curve.set_data(self.lam, self.curr_refl)
-
-        axis_id = self.plot.get_axis_id('left')
-        self.plot.set_axis_limits(axis_id, 0, 1)
-
+        r,g,b = self.calc_current_colour()
+        self.plot_curve.setPen(QColor(int(r*255),int(g*255),int(b*255)))
         self.graphics_view_widget.paint_colour = self.calc_current_colour()
 
     def load_refl_data(self):
@@ -105,7 +112,6 @@ class NanoPaint(QMainWindow, Ui_MainWindow):
         red_val = np.sum(self.curr_refl[ri])/np.size(self.curr_refl[ri])
         green_val = np.sum(self.curr_refl[gi]) / np.size(self.curr_refl[gi])
         blue_val = np.sum(self.curr_refl[bi]) / np.size(self.curr_refl[bi])
-
 
         return (red_val,green_val,blue_val)
 
