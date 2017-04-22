@@ -6,10 +6,12 @@
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from OpenGL.GLUT import *
+#from OpenGL.GLUT import *
 from PyQt4 import QtGui, QtOpenGL
 
 class CylGLView(QtOpenGL.QGLWidget):
+
+    aspect_ratio = 1.3
 
     def initializeGL(self):
         glViewport(0, 0, self.width(), self.height())
@@ -18,7 +20,7 @@ class CylGLView(QtOpenGL.QGLWidget):
         gluQuadricDrawStyle(quadratic, GLU_FILL)
         gluQuadricNormals(quadratic, GLU_SMOOTH)  # Create Smooth Normals (NEW)
 
-        glClearColor(0.95, 0.95, 0.95, 1.)
+        glClearColor(0, 0, 0, 1.)
         glShadeModel(GL_SMOOTH)
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
@@ -39,36 +41,81 @@ class CylGLView(QtOpenGL.QGLWidget):
                   0, -1, 0)  # Camera orientation (x,y,z)
         glPushMatrix()
 
-        self.diameter = 5
+        self.diameter = 0
         self.period = 10
+
+
+    #def heightForWidth(self):
+        #return int(self.width)
+    def sizeHint(self):
+        s = self.size()
+        s.setHeight(s.width()*self.aspect_ratio)
+        return s
+
+    def set_camera(self, cam_pos, cam_aim):
+        ''' Method to set camera position and pointing'''
+        gluLookAt(cam_pos[0], cam_pos[1], cam_pos[2],  # Camera pos (x,y,z)
+                  cam_aim[0], cam_aim[1], cam_aim[2],  # Camera pointed towards (x,y,z)
+                  0, -1, 0)  # Camera orientation (x,y,z)
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        cyl_colour = [1.0, 0., 0., 1.]
-        box_colour = [0, 0, 0, 1]
-
+        cyl_colour = [1, 1, 1, 1.]
+        box_colour = [1, 1, 1]
         m = 5
-        x_list = np.linspace(-m*self.period, m*self.period, 2*m + 1)
-        y_list = np.linspace(-m*self.period, m*self.period, 2*m + 1)
 
-        # Draw cylinder array
-        for i in range(len(x_list)-1):
-            for k in range(len(y_list)-1):
-                x = x_list[i]
-                y = y_list[k]
-                self.draw_cylinder(x, y, 0, self.diameter / 2.0, 10, cyl_colour)
+        if self.diameter != 0:
+            x_list = np.linspace(-m*self.period, m*self.period, 2*m + 1)
+            y_list = np.linspace(-m*self.period, m*self.period, 2*m + 1)
 
-        self.draw_box(0.0, 0, 6, self.period, self.period, 12, box_colour)
+            # Draw cylinder array
+            for i in range(len(x_list)-1):
+                for k in range(len(y_list)-1):
+                    x = x_list[i]
+                    y = y_list[k]
+                    self.draw_cylinder(x, y, 0, self.diameter / 2.0, 10, cyl_colour)
+
+            #self.draw_box(0.0, 0, 6, self.period, self.period, 12, box_colour)
 
 
     def draw_box(self, x, y, z, dx, dy, dz, colour):
         ''' Draws a rectangular box centred at (x,y,z) with dimensions (dx,dy,dz) and supplied colour '''
         glPushMatrix()
         glDisable(GL_LIGHTING)  # Turn off lighting to render box
-        glColor3f(0.0, 0, 0)
-        glScalef(dx, dy, dz)  # Scale space
-        glTranslatef(x/dx, y/dy, z/dz)  # Re-centre at (x,y,z)
-        glutWireCube(1)
+        glColor3f(colour[0], colour[1], colour[2])
+        glTranslatef(x, y, z)  # Re-centre at (x,y,z)
+
+        glLineWidth(0.1)
+        glColor3f(1.0, 0.0, 0.0)
+        glBegin(GL_LINES)
+        glVertex3f(-dx / 2, dy / 2, dz / 2)
+        glVertex3f(dx / 2, dy / 2, dz / 2)
+        glVertex3f(dx / 2, dy / 2, dz / 2)
+        glVertex3f(dx / 2, dy / 2, -dz / 2)
+        glVertex3f(dx / 2, dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, dy / 2, dz / 2)
+
+        glVertex3f(-dx / 2, -dy / 2, dz / 2)
+        glVertex3f(dx / 2, -dy / 2, dz / 2)
+        glVertex3f(dx / 2, -dy / 2, dz / 2)
+        glVertex3f(dx / 2, -dy / 2, -dz / 2)
+        glVertex3f(dx / 2, -dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, -dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, -dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, -dy / 2, dz / 2)
+
+        glVertex3f(-dx / 2, dy / 2, dz / 2)
+        glVertex3f(-dx / 2, -dy / 2, dz / 2)
+        glVertex3f(dx / 2, dy / 2, dz / 2)
+        glVertex3f(dx / 2, -dy / 2, dz / 2)
+        glVertex3f(-dx / 2, dy / 2, -dz / 2)
+        glVertex3f(-dx / 2, -dy / 2, -dz / 2)
+        glVertex3f(dx / 2, dy / 2, -dz / 2)
+        glVertex3f(dx / 2, -dy / 2, -dz / 2)
+        glEnd()
+
         glPopMatrix()
         glEnable(GL_LIGHTING)
 
